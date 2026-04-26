@@ -1,2 +1,2 @@
-# my-games
-game site of union
+# Union HUB
+The best games United
