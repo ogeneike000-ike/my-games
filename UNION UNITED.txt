@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Arcade</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body.neon-bg{
+font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+background:radial-gradient(circle at top,#1a1a3a 0,#050510 60%,#000 100%);
+color:#f5f5f5;min-height:100vh;
+}
+.wrapper{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+.site-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.logo{font-size:26px;letter-spacing:2px;color:#00f5ff;text-shadow:0 0 8px #00f5ff}
+.logo span{color:#ff00ff;text-shadow:0 0 8px #ff00ff}
+nav a{margin-left:16px;text-decoration:none;color:#cccfff;font-size:14px;text-transform:uppercase;letter-spacing:1px;position:relative;cursor:pointer}
+nav a::after{content:"";position:absolute;left:0;bottom:-4px;width:0;height:2px;background:linear-gradient(90deg,#00f5ff,#ff00ff);transition:width .2s}
+nav a:hover::after,nav a.active::after{width:100%}
+.section{display:none}
+.section.active{display:block}
+.hero{text-align:center;margin-bottom:20px}
+.hero h2{font-size:32px;margin-bottom:10px;text-shadow:0 0 10px #00f5ff}
+.hero p{color:#b0b0ff;margin-bottom:10px}
+.search-wrapper{max-width:400px;margin:0 auto 10px}
+#searchBar{width:100%;padding:10px 16px;border-radius:999px;border:1px solid #333366;background:rgba(5,5,25,.9);color:#f5f5ff;outline:none;font-size:14px;box-shadow:0 0 10px rgba(0,245,255,.2);transition:box-shadow .2s,border-color .2s,transform .1s}
+#searchBar::placeholder{color:#666699}
+#searchBar:focus{border-color:#00f5ff;box-shadow:0 0 12px rgba(0,245,255,.6);transform:translateY(-1px)}
+.auth-box{max-width:400px;margin:10px auto;padding:12px 16px;border-radius:12px;background:rgba(10,10,40,.9);border:1px solid #333366}
+.auth-box h3{margin-bottom:8px;text-shadow:0 0 6px #ff00ff}
+.auth-box label{display:block;font-size:13px;margin:6px 0 2px}
+.auth-box input{width:100%;padding:8px;border-radius:6px;border:1px solid #444488;background:#050515;color:#fff;font-size:13px}
+.auth-actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:12px;text-transform:uppercase;letter-spacing:1px;background:linear-gradient(135deg,#00f5ff,#ff00ff);color:#050510;box-shadow:0 0 10px rgba(0,245,255,.5);transition:transform .1s,box-shadow .1s,filter .1s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 14px rgba(255,0,255,.7);filter:brightness(1.1)}
+.btn-secondary{background:linear-gradient(135deg,#555,#999);color:#fff;box-shadow:none}
+.user-info{margin-top:6px;font-size:13px;color:#a0a0ff}
+.admin-panel{
+display:none;margin:20px auto 10px;max-width:650px;padding:18px;
+background:rgba(10,10,40,.97);border-radius:16px;border:1px solid #333366;
+box-shadow:0 0 20px rgba(255,0,255,.4);
+opacity:0;transform:translateY(10px);transition:opacity .25s ease,transform .25s ease;
+}
+.admin-panel.visible{opacity:1;transform:translateY(0)}
+.admin-panel h2{margin-bottom:10px;text-shadow:0 0 8px #ff00ff}
+.admin-section{margin-bottom:14px;padding:10px;border:1px solid #333366;border-radius:10px;background:rgba(20,20,60,.6)}
+.admin-section h3{margin-bottom:6px;text-shadow:0 0 6px #00f5ff;font-size:15px}
+.admin-section p{font-size:13px;margin:2px 0}
+.admin-section input,.admin-section select{
+width:100%;padding:7px;margin:4px 0;border-radius:6px;border:1px solid #444488;
+background:#0a0a22;color:#fff;font-size:13px;
+}
+.admin-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.admin-row .btn{flex:1}
+.log-box{height:120px;overflow-y:auto;background:#050515;border:1px solid #333366;padding:6px;border-radius:6px;font-size:11px}
+.featured,.game-list{margin-top:20px}
+.featured h3,.page-header h2{margin-bottom:6px;text-shadow:0 0 6px #00f5ff}
+.featured p,.page-header p{color:#a0a0ff;margin-bottom:6px;font-size:13px}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:6px}
+.game-card{text-decoration:none;color:#f5f5ff;background:rgba(10,10,40,.9);border-radius:14px;padding:10px;border:1px solid #262650;transition:transform .15s,box-shadow .15s,border-color .15s;cursor:pointer}
+.game-card p{margin-top:6px;font-size:14px;text-align:center}
+.game-card:hover{transform:translateY(-3px);border-color:#00f5ff;box-shadow:0 0 16px rgba(0,245,255,.4)}
+.game-thumb{width:100%;height:100px;border-radius:10px;background:radial-gradient(circle at top left,#00f5ff,#050510)}
+.game-thumb.alt{background:radial-gradient(circle at top right,#ff00ff,#050510)}
+.glow{box-shadow:0 0 18px rgba(0,245,255,.6)}
+.page-header{margin-bottom:10px}
+.center{text-align:center}
+.game-container{margin-top:30px}
+.game-container h2{margin-bottom:8px;text-shadow:0 0 8px #ff00ff}
+.game-container p{color:#a0a0ff;margin-bottom:16px}
+.clicker-box{display:inline-block;padding:18px 26px;border-radius:16px;background:rgba(10,10,40,.95);border:1px solid #333366;box-shadow:0 0 20px rgba(0,245,255,.5)}
+.clicker-box p{margin-bottom:10px;font-size:18px}
+#globalBanner{
+background:#00f5ff;color:#050510;text-align:center;padding:8px;
+font-size:13px;font-weight:600;box-shadow:0 0 12px #00f5ff;margin-bottom:8px;
+}
+#maintBanner{
+background:#ff0066;color:#fff;text-align:center;padding:8px;
+font-size:13px;font-weight:600;box-shadow:0 0 12px #ff0066;margin-bottom:8px;
+}
+</style>
+</head>
+<body class="neon-bg">
+<div class="wrapper">
+<header class="site-header">
+<h1 class="logo">NEON<span>ARCADE</span></h1>
+<nav>
+<a data-target="home" class="active">Home</a>
+<a data-target="games">Games</a>
+<a data-target="game1">Neon Clicker</a>
+</nav>
+</header>
+
+<div id="bannerContainer"></div>
+
+<section id="home" class="section active">
+<div class="hero">
+<h2>Play. Grind. Repeat.</h2>
+<p>Welcome to the neon zone. Log in, play, and control the grid.</p>
+
+<div class="search-wrapper">
+<input type="text" id="searchBar" placeholder="Search games..." autocomplete="off">
+</div>
+</div>
+
+<div class="auth-box">
+<h3>Account</h3>
+<label>Username</label>
+<input id="authUser" autocomplete="off">
+<label>Password</label>
+<input id="authPass" type="password">
+<div class="auth-actions">
+<button class="btn" id="loginBtn">Login</button>
+<button class="btn btn-secondary" id="registerBtn">Register</button>
+<button class="btn btn-secondary" id="logoutBtn">Logout</button>
+</div>
+<div class="user-info" id="userInfo">Not logged in.</div>
+</div>
+
+<section id="adminPanel" class="admin-panel">
+<h2>Admin Control Center</h2>
+
+<div class="admin-section">
+<h3>📊 Site Stats</h3>
+<p>Total Visits: <span id="statVisits">0</span></p>
+<p>Total Game Plays: <span id="statPlays">0</span></p>
+<p>Neon Clicker Score Total: <span id="statClicks">0</span></p>
+</div>
+
+<div class="admin-section">
+<h3>👥 Users & Roles</h3>
+<p>Current Users:</p>
+<select id="userSelect"></select>
+<div class="admin-row">
+<button class="btn" id="promoteModBtn">Make Moderator</button>
+<button class="btn" id="demoteUserBtn">Make User</button>
+</div>
+<div class="admin-row">
+<button class="btn" id="kickBtn">Kick</button>
+<button class="btn" id="banBtn">Ban</button>
+<button class="btn" id="unbanBtn">Unban</button>
+</div>
+</div>
+
+<div class="admin-section">
+<h3>🎮 Game Manager</h3>
+<input id="newGameName" placeholder="Game Name">
+<div class="admin-row">
+<button class="btn" id="addGameBtn">Add Game</button>
+</div>
+<p>Remove Game:</p>
+<select id="removeGameSelect"></select>
+<div class="admin-row">
+<button class="btn" id="removeGameBtn">Remove Game</button>
+</div>
+</div>
+
+<div class="admin-section">
+<h3>📢 Global Message</h3>
+<input id="globalMsgInput" placeholder="Set global message...">
+<div class="admin-row">
+<button class="btn" id="setGlobalMsgBtn">Set Message</button>
+<button class="btn btn-secondary" id="clearGlobalMsgBtn">Clear</button>
+</div>
+</div>
+
+<div class="admin-section">
+<h3>⚠ Maintenance Mode</h3>
+<p>Status: <span id="maintenanceStatus">OFF</span></p>
+<div class="admin-row">
+<button class="btn" id="toggleMaintenance">Toggle Maintenance</button>
+</div>
+</div>
+
+<div class="admin-section">
+<h3>📜 Logs</h3>
+<div id="logBox" class="log-box"></div>
+</div>
+
+<button id="backBtn" class="btn btn-secondary" style="width:100%;margin-top:4px">Hide Admin Panel</button>
+</section>
+
+<section class="featured">
+<h3>Featured Games</h3>
+<p>Start with Neon Clicker or browse all games.</p>
+<div class="game-grid">
+<div class="game-card" data-target="game1">
+<div class="game-thumb glow"></div>
+<p>Neon Clicker</p>
+</div>
+<div class="game-card" data-target="games">
+<div class="game-thumb glow alt"></div>
+<p>View All Games</p>
+</div>
+</div>
+</section>
+</section>
+
+<section id="games" class="section">
+<div class="page-header">
+<h2>All Games</h2>
+<p>More games coming soon. Keep grinding.</p>
+</div>
+<section class="game-list">
+<div class="game-grid" id="gamesGrid">
+<!-- Filled by JS -->
+</div>
+</section>
+</section>
+
+<section id="game1" class="section center">
+<section class="game-container">
+<h2>Neon Clicker</h2>
+<p>Click the button as many times as you can.</p>
+<div class="clicker-box glow">
+<p>Score: <span id="score">0</span></p>
+<button id="clickBtn" class="btn">CLICK</button>
+</div>
+</section>
+</section>
+</div>
+
+<script>
+// ---------- NAV / SECTIONS ----------
+const navLinks = document.querySelectorAll("nav a[data-target]");
+const sections = document.querySelectorAll(".section");
+const gameCards = document.querySelectorAll(".game-card[data-target]");
+
+function showSection(id){
+sections.forEach(sec=>sec.classList.toggle("active",sec.id===id));
+navLinks.forEach(link=>link.classList.toggle("active",link.getAttribute("data-target")===id));
+}
+navLinks.forEach(link=>{
+link.addEventListener("click",()=>showSection(link.getAttribute("data-target")));
+});
+gameCards.forEach(card=>{
+card.addEventListener("click",()=>showSection(card.getAttribute("data-target")));
+});
+
+// ---------- DATA & STORAGE ----------
+const ADMIN_USERNAME = "IkeUnited";
+const ADMIN_PASSWORD = "idwinbcimchrolo"; // replace locally later if you want
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let stats = JSON.parse(localStorage.getItem("stats")) || {visits:0,plays:0,clicks:0};
+let games = JSON.parse(localStorage.getItem("games")) || ["Neon Clicker"];
+let logs = JSON.parse(localStorage.getItem("logs")) || [];
+let maintenance = JSON.parse(localStorage.getItem("maintenance")) || false;
+let globalMessage = localStorage.getItem("globalMessage") || "";
+let currentUser = null;
+
+function saveAll(){
+localStorage.setItem("users",JSON.stringify(users));
+localStorage.setItem("stats",JSON.stringify(stats));
+localStorage.setItem("games",JSON.stringify(games));
+localStorage.setItem("logs",JSON.stringify(logs));
+localStorage.setItem("maintenance",JSON.stringify(maintenance));
+localStorage.setItem("globalMessage",globalMessage);
+}
+
+// ensure admin exists
+function ensureAdmin(){
+const existing = users.find(u=>u.username===ADMIN_USERNAME);
+if(!existing){
+users.push({username:ADMIN_USERNAME,password:ADMIN_PASSWORD,role:"admin",banned:false});
+addLog("System: created default admin account.");
+saveAll();
+}else{
+existing.role="admin";
+existing.banned=false;
+saveAll();
+}
+}
+ensureAdmin();
+
+// ---------- LOGGING ----------
+function addLog(text){
+const ts = new Date().toLocaleTimeString();
+logs.push("["+ts+"] "+text);
+if(logs.length>200) logs = logs.slice(-200);
+saveAll();
+renderLogs();
+}
+function renderLogs(){
+const logBox = document.getElementById("logBox");
+if(!logBox) return;
+logBox.innerHTML = logs.slice(-80).join("<br>");
+}
+
+// ---------- STATS ----------
+stats.visits++;
+saveAll();
+function updateStatsUI(){
+const v=document.getElementById("statVisits");
+const p=document.getElementById("statPlays");
+const c=document.getElementById("statClicks");
+if(v) v.textContent=stats.visits;
+if(p) p.textContent=stats.plays;
+if(c) c.textContent=stats.clicks;
+}
+
+// ---------- GLOBAL MESSAGE & MAINTENANCE ----------
+const bannerContainer = document.getElementById("bannerContainer");
+function renderGlobalMessage(){
+const existing = document.getElementById("globalBanner");
+if(existing) existing.remove();
+if(globalMessage){
+const div = document.createElement("div");
+div.id="globalBanner";
+div.textContent=globalMessage;
+bannerContainer.prepend(div);
+}
+}
+function renderMaintenance(){
+const existing = document.getElementById("maintBanner");
+if(existing) existing.remove();
+const statusSpan = document.getElementById("maintenanceStatus");
+if(statusSpan) statusSpan.textContent = maintenance ? "ON" : "OFF";
+if(maintenance){
+const div = document.createElement("div");
+div.id="maintBanner";
+div.textContent="⚠ Site is in Maintenance Mode";
+bannerContainer.prepend(div);
+}
+}
+
+// ---------- AUTH ----------
+const authUser = document.getElementById("authUser");
+const authPass = document.getElementById("authPass");
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
+
+function getRoleLabel(role){
+if(role==="admin") return "Admin";
+if(role==="mod") return "Moderator";
+return "User";
+}
+
+function updateUserInfo(){
+if(!currentUser){
+userInfo.textContent="Not logged in.";
+}else{
+userInfo.textContent=`Logged in as ${currentUser.username} (${getRoleLabel(currentUser.role)})`;
+}
+updateAdminVisibility();
+}
+
+function findUser(username){
+return users.find(u=>u.username.toLowerCase()===username.toLowerCase());
+}
+
+function login(username,password){
+const u = findUser(username);
+if(!u){alert("User not found.");return;}
+if(u.banned){alert("You are banned from this site.");return;}
+if(u.password!==password){alert("Wrong password.");return;}
+currentUser = u;
+addLog(`Login: ${u.username} (${u.role})`);
+updateUserInfo();
+}
+
+function register(username,password){
+if(!username || !password){alert("Enter username and password.");return;}
+if(findUser(username)){alert("Username already exists.");return;}
+const role = "user";
+const u = {username,password,role,banned:false};
+users.push(u);
+saveAll();
+addLog(`Registered: ${username}`);
+alert("Account created. You can now log in.");
+}
+
+loginBtn.addEventListener("click",()=>{
+login(authUser.value.trim(),authPass.value);
+saveAll();
+});
+registerBtn.addEventListener("click",()=>{
+register(authUser.value.trim(),authPass.value);
+});
+logoutBtn.addEventListener("click",()=>{
+if(currentUser){
+addLog(`Logout: ${currentUser.username}`);
+}
+currentUser=null;
+updateUserInfo();
+});
+
+// ---------- ADMIN PANEL VISIBILITY ----------
+const adminPanel = document.getElementById("adminPanel");
+const backBtn = document.getElementById("backBtn");
+function canUseAdmin(){
+return currentUser && (currentUser.role==="admin" || currentUser.role==="mod");
+}
+function showAdminPanel(){
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+adminPanel.style.display="block";
+requestAnimationFrame(()=>adminPanel.classList.add("visible"));
+}
+function hideAdminPanel(){
+adminPanel.classList.remove("visible");
+setTimeout(()=>{adminPanel.style.display="none";},200);
+}
+backBtn.addEventListener("click",hideAdminPanel);
+
+function updateAdminVisibility(){
+if(!canUseAdmin()){
+adminPanel.classList.remove("visible");
+adminPanel.style.display="none";
+}
+}
+
+// ---------- DISGUISED ADMIN TRIGGER ----------
+const searchBar = document.getElementById("searchBar");
+const SECRET = "admin123";
+if(searchBar){
+searchBar.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+const value = searchBar.value.trim();
+if(value===SECRET){
+searchBar.value="";
+if(canUseAdmin()){
+showAdminPanel();
+addLog(`Admin panel opened by ${currentUser.username}`);
+}else{
+alert("You must be admin or moderator to open admin panel.");
+}
+}else{
+addLog(`Search: "${value}" by ${currentUser?currentUser.username:"guest"}`);
+alert("Searching for: "+value);
+}
+}
+});
+}
+
+// ---------- GAME MANAGER ----------
+const gamesGrid = document.getElementById("gamesGrid");
+const newGameName = document.getElementById("newGameName");
+const addGameBtn = document.getElementById("addGameBtn");
+const removeGameSelect = document.getElementById("removeGameSelect");
+const removeGameBtn = document.getElementById("removeGameBtn");
+
+function renderGames(){
+if(gamesGrid){
+gamesGrid.innerHTML="";
+games.forEach(name=>{
+const card = document.createElement("div");
+card.className="game-card";
+card.innerHTML=`<div class="game-thumb glow"></div><p>${name}</p>`;
+card.addEventListener("click",()=>{
+stats.plays++;
+saveAll();
+updateStatsUI();
+addLog(`Game opened: ${name} by ${currentUser?currentUser.username:"guest"}`);
+if(name==="Neon Clicker") showSection("game1");
+else alert("Placeholder game: "+name);
+});
+gamesGrid.appendChild(card);
+});
+}
+if(removeGameSelect){
+removeGameSelect.innerHTML="";
+games.forEach(name=>{
+const opt=document.createElement("option");
+opt.value=name;opt.textContent=name;
+removeGameSelect.appendChild(opt);
+});
+}
+}
+
+addGameBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+const name = newGameName.value.trim();
+if(!name) return;
+if(games.includes(name)){alert("Game already exists.");return;}
+games.push(name);
+saveAll();
+renderGames();
+addLog(`Game added: ${name} by ${currentUser.username}`);
+newGameName.value="";
+});
+removeGameBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+const name = removeGameSelect.value;
+if(name==="Neon Clicker"){alert("Cannot remove core game.");return;}
+games = games.filter(g=>g!==name);
+saveAll();
+renderGames();
+addLog(`Game removed: ${name} by ${currentUser.username}`);
+});
+
+// ---------- USERS & ROLES / KICK / BAN ----------
+const userSelect = document.getElementById("userSelect");
+const promoteModBtn = document.getElementById("promoteModBtn");
+const demoteUserBtn = document.getElementById("demoteUserBtn");
+const kickBtn = document.getElementById("kickBtn");
+const banBtn = document.getElementById("banBtn");
+const unbanBtn = document.getElementById("unbanBtn");
+
+function renderUserList(){
+if(!userSelect) return;
+userSelect.innerHTML="";
+users.forEach(u=>{
+const opt=document.createElement("option");
+opt.value=u.username;
+opt.textContent=`${u.username} (${getRoleLabel(u.role)}${u.banned?" - BANNED":""})`;
+userSelect.appendChild(opt);
+});
+}
+
+function requireAdmin(){
+if(!currentUser || currentUser.role!=="admin"){
+alert("Admin only.");
+return false;
+}
+return true;
+}
+
+promoteModBtn.addEventListener("click",()=>{
+if(!requireAdmin())return;
+const uname=userSelect.value;
+const u=findUser(uname);
+if(!u)return;
+if(u.username===ADMIN_USERNAME){alert("Admin is already highest role.");return;}
+u.role="mod";
+saveAll();
+renderUserList();
+addLog(`Promoted to mod: ${u.username} by ${currentUser.username}`);
+});
+
+demoteUserBtn.addEventListener("click",()=>{
+if(!requireAdmin())return;
+const uname=userSelect.value;
+const u=findUser(uname);
+if(!u)return;
+if(u.username===ADMIN_USERNAME){alert("Cannot demote admin.");return;}
+u.role="user";
+saveAll();
+renderUserList();
+addLog(`Demoted to user: ${u.username} by ${currentUser.username}`);
+});
+
+kickBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+const uname=userSelect.value;
+if(!uname)return;
+addLog(`Kick: ${uname} by ${currentUser.username}`);
+if(currentUser && currentUser.username===uname){
+currentUser=null;
+updateUserInfo();
+}
+alert(`User ${uname} has been kicked (local session only).`);
+});
+
+banBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+const uname=userSelect.value;
+const u=findUser(uname);
+if(!u)return;
+if(u.username===ADMIN_USERNAME){alert("Cannot ban admin.");return;}
+u.banned=true;
+saveAll();
+renderUserList();
+addLog(`Banned: ${u.username} by ${currentUser.username}`);
+if(currentUser && currentUser.username===u.username){
+currentUser=null;
+updateUserInfo();
+alert("You have been banned.");
+}
+});
+
+unbanBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+const uname=userSelect.value;
+const u=findUser(uname);
+if(!u)return;
+u.banned=false;
+saveAll();
+renderUserList();
+addLog(`Unbanned: ${u.username} by ${currentUser.username}`);
+});
+
+// ---------- GLOBAL MESSAGE CONTROLS ----------
+const globalMsgInput = document.getElementById("globalMsgInput");
+const setGlobalMsgBtn = document.getElementById("setGlobalMsgBtn");
+const clearGlobalMsgBtn = document.getElementById("clearGlobalMsgBtn");
+
+setGlobalMsgBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+globalMessage = globalMsgInput.value.trim();
+saveAll();
+renderGlobalMessage();
+addLog(`Global message set by ${currentUser.username}`);
+});
+clearGlobalMsgBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+globalMessage="";
+saveAll();
+renderGlobalMessage();
+addLog(`Global message cleared by ${currentUser.username}`);
+});
+
+// ---------- MAINTENANCE ----------
+const toggleMaintenanceBtn = document.getElementById("toggleMaintenance");
+toggleMaintenanceBtn.addEventListener("click",()=>{
+if(!canUseAdmin()){alert("Admin/Moderator only.");return;}
+maintenance=!maintenance;
+saveAll();
+renderMaintenance();
+addLog(`Maintenance mode: ${maintenance?"ON":"OFF"} by ${currentUser.username}`);
+});
+
+// ---------- NEON CLICKER ----------
+const scoreEl = document.getElementById("score");
+const clickBtn = document.getElementById("clickBtn");
+let score=0;
+if(clickBtn && scoreEl){
+clickBtn.addEventListener("click",()=>{
+score++;
+scoreEl.textContent=score;
+stats.clicks++;
+saveAll();
+updateStatsUI();
+});
+}
+
+// ---------- INIT ----------
+renderLogs();
+renderGames();
+renderUserList();
+updateStatsUI();
+renderGlobalMessage();
+renderMaintenance();
+updateUserInfo();
+</script>
+</body>
+</html>
